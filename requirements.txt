@@ -1,0 +1,19 @@
+# Core Deep Reinforcement Learning
+gymnasium>=0.29.0
+stable-baselines3>=2.2.0
+torch>=2.0.0
+
+# Visualization and Monitoring
+matplotlib>=3.7.0
+tensorboard>=2.14.0
+seaborn>=0.12.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Optional: Performance Monitoring
+psutil>=5.9.0
+
+# Optional: Progress Bars
+tqdm>=4.65.0
