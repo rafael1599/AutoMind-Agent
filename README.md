@@ -2,7 +2,7 @@
 
 ## Hombros de Gigantes: Nuestra Filosofía de Investigación
 
-Este proyecto no es una isla de conocimiento; es una estructura erigida sobre los **hombros de gigantes**. En **AutoMind-Agent**, reconocemos que la innovación disruptiva nace de la síntesis de fronteras. Hemos utilizado **Google DeepMind** como nuestra brújula arquitectónica y **NotebookLM** como el catalizador crítico para orquestar y sintetizar flujos masivos de conocimiento científico en una solución tangible. No solo estamos programando un taxi; estamos participando en una tradición de excelencia en investigación que busca democratizar el acceso a arquitecturas de memoria profunda complejas.
+Este proyecto no es una isla de conocimiento; es una estructura erigida sobre los **hombros de gigantes**. En **AutoMind-Agent**, reconocemos que la innovación disruptiva nace de la síntesis de fronteras. Hemos utilizado **Google DeepMind** como nuestra brújula arquitectónica y **NotebookLM** como el catalizador crítico para orquestar y sintetizar flujos masivos de conocimiento científico en una solución tangible. No solo estamos programando un agente autonomo; estamos participando en una tradición de excelencia en investigación que busca democratizar el acceso a arquitecturas de memoria profunda complejas.
 
 ## Visión y Filosofía del Proyecto
 
