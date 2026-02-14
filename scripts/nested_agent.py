@@ -92,10 +92,10 @@ def get_torch_threads_optimized():
     total_threads = 20
     torch.set_num_threads(total_threads)
     torch.set_num_interop_threads(total_threads)
-    print(f"🚀 PyTorch optimizado para {total_threads} hilos (i9-10900KF).")
+    print(f"[STATUS] PyTorch optimizado para {total_threads} hilos (i9-10900KF).")
 
 if __name__ == "__main__":
     get_torch_threads_optimized()
     # Demo de inicialización
     agent = NestedTaxiAgent(state_dim=50, action_dim=6)
-    print("✅ NestedTaxiAgent inicializado con éxito.")
+    print("[OK] NestedTaxiAgent inicializado con éxito.")

@@ -19,11 +19,11 @@ def check_system():
     
     # Validation for i9-10900KF (10 cores / 20 threads)
     if physical_cores >= 10 and logical_cores >= 20:
-        print("✅ HARDWARE VERIFIED: High-performance CPU detected (likely i9-10900KF or better).")
+        print("[STATUS] HARDWARE VERIFIED: High-performance CPU detected (likely i9-10900KF or better).")
     elif logical_cores >= 16:
-        print("⚠️ HARDWARE NOTE: High thread count detected. Suitable for parallel RL training.")
+        print("[NOTE] HARDWARE NOTE: High thread count detected. Suitable for parallel RL training.")
     else:
-        print("⚠️ HARDWARE WARNING: Core count lower than expected for i9-10900KF.")
+        print("[WARNING] HARDWARE WARNING: Core count lower than expected for i9-10900KF.")
 
     print("-"*40)
 
@@ -40,9 +40,9 @@ def check_system():
         try:
             __import__(package)
             version = sys.modules[package].__version__
-            print(f"✅ FOUND: {name} (v{version})")
+            print(f"[OK] FOUND: {name} (v{version})")
         except ImportError:
-            print(f"❌ MISSING: {name}")
+            print(f"[ERROR] MISSING: {name}")
             all_installed = False
 
     print("-"*40)
@@ -51,18 +51,18 @@ def check_system():
     try:
         import torch
         if torch.cuda.is_available():
-            print(f"✅ CUDA AVAILABLE: {torch.cuda.get_device_name(0)}")
+            print(f"[OK] CUDA AVAILABLE: {torch.cuda.get_device_name(0)}")
         else:
-            print("ℹ️  CUDA NOT AVAILABLE: Training will rely on CPU (Optimized for i9).")
+            print("[INFO] CUDA NOT AVAILABLE: Training will rely on CPU (Optimized for i9).")
     except ImportError:
         pass
 
     print("="*40)
     
     if all_installed:
-        print("🚀 READY FOR TRAINING")
+        print("[STATUS] READY FOR TRAINING")
     else:
-        print("🛑 ACTION REQUIRED: Install missing dependencies.")
+        print("[ACTION] ACTION REQUIRED: Install missing dependencies.")
 
 if __name__ == "__main__":
     check_system()
