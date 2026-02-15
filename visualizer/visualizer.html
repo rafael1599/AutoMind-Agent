@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoMind Ultra 3D - FIXED</title>
+    <!-- Usando CDNs más estables -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: #00ffcc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 15, 15, 0.9);
+            padding: 15px;
+            border: 2px solid #00ffcc;
+            border-radius: 8px;
+            box-shadow: 0 0 15px #00ffcc;
+            z-index: 100;
+            min-width: 200px;
+        }
+
+        #connection-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        #status-bar {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ffcc;
+            z-index: 100;
+        }
+
+        #debug-log {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            font-size: 10px;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            max-height: 100px;
+            overflow-y: auto;
+            width: 250px;
+            z-index: 100;
+        }
+
+        .stat {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .val {
+            color: #fff;
+            float: right;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #004433;
+            margin: 10px 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="hud">
+        <div style="font-weight: bold; border-bottom: 1px solid #00ffcc; padding-bottom: 5px; margin-bottom: 10px;">🚕
+            AUTOMIND ULTRA HUD</div>
+        <div class="stat">EPISODIO <span id="ep" class="val">0</span></div>
+        <div class="stat">PASO <span id="step" class="val">0</span></div>
+        <hr>
+        <div class="stat">V_ESTIMATE <span id="value" class="val">0.000</span></div>
+        <div class="stat">SURPRISE <span id="surprise" class="val">0.000</span></div>
+        <div class="stat">ÚLTIMA ACCIÓN <span id="action" class="val">IDLE</span></div>
+        <hr>
+        <div class="stat">LiDAR N: <span id="ln" class="val">CLEAR</span></div>
+        <div class="stat">LiDAR S: <span id="ls" class="val">CLEAR</span></div>
+        <div class="stat">LiDAR E: <span id="le" class="val">CLEAR</span></div>
+        <div class="stat">LiDAR W: <span id="lw" class="val">CLEAR</span></div>
+    </div>
+
+    <div id="connection-info">ESPACIO: BUSCANDO SERVIDOR...</div>
+    <div id="status-bar">SISTEMA LISTO</div>
+    <div id="debug-log">Iniciando sistema...</div>
+
+    <script>
+        function log(msg) {
+            const d = document.getElementById('debug-log');
+            d.innerHTML += "<div>> " + msg + "</div>";
+            d.scrollTop = d.scrollHeight;
+            console.log(msg);
+        }
+
+        log("Cargando escena 3D...");
+
+        // --- 3D ENGINE ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.Fog(0x050505, 5, 15);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(2, 5, 7);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(2, 0, 2);
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0x404040, 2));
+        const spotlight = new THREE.SpotLight(0x00ffcc, 1);
+        spotlight.position.set(5, 10, 5);
+        scene.add(spotlight);
+
+        // Grid Central (5x5 para TaxiEnv)
+        const gridHelper = new THREE.GridHelper(5, 5, 0x00ffcc, 0x002211);
+        gridHelper.position.set(2, 0, 2);
+        scene.add(gridHelper);
+
+        // Taxi Model
+        const taxi = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.8), new THREE.MeshPhongMaterial({ color: 0xffcc00 }));
+        body.position.y = 0.15;
+        taxi.add(body);
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.4), new THREE.MeshPhongMaterial({ color: 0x000000, transparent: true, opacity: 0.7 }));
+        cabin.position.y = 0.4;
+        taxi.add(cabin);
+        scene.add(taxi);
+
+        const passengerGeo = new THREE.SphereGeometry(0.25, 16, 16);
+        const passengerMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Glow green
+        const passenger = new THREE.Mesh(passengerGeo, passengerMat);
+        passenger.position.y = 0.25;
+        scene.add(passenger);
+
+        const destGeo = new THREE.TorusGeometry(0.35, 0.08, 16, 32);
+        const destMat = new THREE.MeshBasicMaterial({ color: 0x0088ff }); // Glow blue
+        const dest = new THREE.Mesh(destGeo, destMat);
+        dest.rotation.x = Math.PI / 2;
+        dest.position.y = 0.1;
+        scene.add(dest);
+
+        // LiDAR visualization
+        const lidarMats = {
+            'N': new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 }),
+            'S': new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 }),
+            'E': new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 }),
+            'W': new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 })
+        };
+
+        const lidarN = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1), lidarMats.N);
+        lidarN.position.z = -0.6; taxi.add(lidarN);
+
+        const lidarS = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1), lidarMats.S);
+        lidarS.position.z = 0.6; taxi.add(lidarS);
+
+        const lidarE = new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 0.1), lidarMats.E);
+        lidarE.position.x = 0.6; taxi.add(lidarE);
+
+        const lidarW = new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 0.1), lidarMats.W);
+        lidarW.position.x = -0.6; taxi.add(lidarW);
+
+        // Obstacles
+        let obstacleMeshes = [];
+        const barrierGeo = new THREE.BoxGeometry(0.85, 0.8, 0.85); // Más altos y grandes
+        const barrierMat = new THREE.MeshPhongMaterial({ color: 0xff4400, shininess: 100 });
+
+        function updateObstacles(list) {
+            log("Actualizando mapa: " + list.length + " obstáculos detectados");
+            obstacleMeshes.forEach(m => scene.remove(m));
+            obstacleMeshes = [];
+            list.forEach(o => {
+                const b = new THREE.Mesh(barrierGeo, barrierMat);
+                // Mapeo TaxiEnv(R,C) -> 3D(Z,X)
+                b.position.set(o.y, 0.4, o.x); // Altura centrada
+                scene.add(b);
+                obstacleMeshes.push(b);
+            });
+        }
+
+        // --- NETWORK ---
+        let socket;
+        function connect() {
+            log("Conectando a ws://localhost:8765...");
+            socket = new WebSocket("ws://localhost:8765");
+
+            socket.onopen = () => {
+                log("¡Servidor Conectado!");
+                const info = document.getElementById('connection-info');
+                info.innerText = "ESTADO: ONLINE";
+                info.style.color = "#00ffcc";
+                info.style.borderColor = "#00ffcc";
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'init') {
+                    updateObstacles(data.obstacles);
+                    document.getElementById('ep').innerText = data.episode;
+                }
+                else if (data.type === 'step') {
+                    // Update Position (Mapping: TaxiEnv R,C -> 3D Z,X)
+                    taxi.position.x = data.position.y;
+                    taxi.position.z = data.position.x;
+
+                    const rots = { "North": Math.PI, "South": 0, "East": Math.PI / 2, "West": -Math.PI / 2 };
+                    taxi.rotation.y = rots[data.position.orientation] || 0;
+
+                    // Update Passenger & Destination
+                    passenger.position.x = data.status.passenger_pos.y;
+                    passenger.position.z = data.status.passenger_pos.x;
+                    passenger.visible = !data.status.has_passenger;
+
+                    dest.position.x = data.status.dest_pos.y;
+                    dest.position.z = data.status.dest_pos.x;
+                    dest.visible = true;
+
+                    // Update HUD
+                    document.getElementById('step').innerText = data.step;
+                    document.getElementById('value').innerText = data.brain.value.toFixed(3);
+                    document.getElementById('surprise').innerText = (data.brain.entropy || 0).toFixed(3);
+                    document.getElementById('action').innerText = data.brain.action_name;
+
+                    // LiDAR HUD & Vis
+                    setLidar('N', data.sensors.N);
+                    setLidar('S', data.sensors.S);
+                    setLidar('E', data.sensors.E);
+                    setLidar('W', data.sensors.W);
+
+                    document.getElementById('status-bar').innerText = data.status.has_passenger ? "PASAJERO A BORDO" : "BUSCANDO PASAJERO";
+                    document.getElementById('status-bar').style.color = data.status.has_passenger ? "#ffcc00" : "#00ffcc";
+                }
+            };
+
+            socket.onclose = () => {
+                log("Conexión perdida. Reintentando...");
+                document.getElementById('connection-info').innerText = "ESTADO: OFFLINE";
+                document.getElementById('connection-info').style.color = "red";
+                document.getElementById('connection-info').style.borderColor = "red";
+                setTimeout(connect, 2000);
+            };
+        }
+
+        function setLidar(id, val) {
+            const hud = document.getElementById('l' + id.toLowerCase());
+            hud.innerText = val > 0 ? "DETECTADO" : "CLEAR";
+            hud.style.color = val > 0 ? "red" : "#fff";
+            lidarMats[id].opacity = val > 0 ? 0.8 : 0;
+        }
+
+        connect();
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

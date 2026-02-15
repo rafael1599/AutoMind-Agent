@@ -39,36 +39,35 @@ class TaxiEnv(gym.Env):
         super().reset(seed=seed)
         self.current_step = 0
         
-        # --- LÓGICA DE SPAWN POR PROXIMIDAD (Nivel 0) ---
-        if self.current_level == 0:
-            # Taxi cerca del pasajero
-            self.pass_idx = self.np_random.integers(0, 4)
-            self.pass_row, self.pass_col = self.locs[self.pass_idx]
-            
-            # Taxi a max 2 celdas de distancia
-            while True:
+        # --- LÓGICA DE SPAWN CON GARANTÍA DE NAVEGABILIDAD ---
+        # Reintentar spawn hasta que el mapa sea navegable (BFS)
+        max_spawn_retries = 100
+        for _ in range(max_spawn_retries):
+            if self.current_level == 0:
+                # Taxi cerca del pasajero
+                self.pass_idx = self.np_random.integers(0, 4)
+                self.pass_row, self.pass_col = self.locs[self.pass_idx]
+                
                 self.taxi_row = np.clip(self.pass_row + self.np_random.integers(-2, 3), 0, 4)
                 self.taxi_col = np.clip(self.pass_col + self.np_random.integers(-2, 3), 0, 4)
-                if (self.taxi_row, self.taxi_col) not in self.obstacles: break
-            
-            # Destino cerca del pasajero
-            while True:
-                self.dest_idx = self.np_random.integers(0, 4)
-                if self.dest_idx != self.pass_idx: break
-            self.dest_row, self.dest_col = self.locs[self.dest_idx]
-        else:
-            # Spawn aleatorio total (Nivel 1+)
-            while True:
+            else:
+                # Spawn aleatorio total (Nivel 1+)
                 self.taxi_row = self.np_random.integers(0, self.grid_size)
                 self.taxi_col = self.np_random.integers(0, self.grid_size)
-                if (self.taxi_row, self.taxi_col) not in self.obstacles: break
-                
-            self.pass_idx = self.np_random.integers(0, 4)
-            self.pass_row, self.pass_col = self.locs[self.pass_idx]
+                    
+                self.pass_idx = self.np_random.integers(0, 4)
+                self.pass_row, self.pass_col = self.locs[self.pass_idx]
+
+            # Candidato de Destino
             while True:
                 self.dest_idx = self.np_random.integers(0, 4)
                 if self.dest_idx != self.pass_idx: break
             self.dest_row, self.dest_col = self.locs[self.dest_idx]
+
+            # VALIDACIÓN: No spawn en obstáculo Y Ruta BFS disponible
+            not_on_obstacle = (self.taxi_row, self.taxi_col) not in self.obstacles
+            if not_on_obstacle and self._is_reachable(self.obstacles):
+                break # Éxito: el agente tiene camino libre
 
         self.has_passenger = 0
         self.visit_counts = {}
@@ -183,10 +182,11 @@ class TaxiEnv(gym.Env):
 
     def generate_random_obstacles(self, count):
         """BFS para asegurar navegabilidad."""
-        for _ in range(50):
+        for _ in range(100):
             new_obs = set()
             while len(new_obs) < count:
-                r, c = np.random.randint(0, 5, 2)
+                r = self.np_random.integers(0, 5)
+                c = self.np_random.integers(0, 5)
                 if (r, c) not in self.locs and (r, c) != (self.taxi_row, self.taxi_col):
                     new_obs.add((r, c))
             if self._is_reachable(new_obs):

@@ -1,6 +1,6 @@
 
-# AutoMind-Ultra: MERIT-BASED TELEMETRY (Fase 3.6 - LiDAR + STABLE CRITIC)
-# DeepFix: Virtual LiDAR + Return Normalization + Plateau LR + 35% Rollback
+# AutoMind-Ultra: COGNITIVE ARCHITECTURE (Fase 4 - Memory + Curiosity)
+# DeepFix: Target Networks + Intrinsic Motivation + LiDAR
 
 import time
 import numpy as np
@@ -22,6 +22,10 @@ NUM_EPOCHS = 4
 MB_SIZE_ENVS = 4 # 3 batches por época (12/4) = 12 actualizaciones de peso por rollout
 LEARNING_RATE = 2.5e-4
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# --- CONFIGURACION COGNITIVA ---
+TARGET_TAU = 0.01      # Velocidad de consolidación de memoria (1% por update)
+CURIOSITY_WEIGHT = 0.05 # Cuánto le importa al agente aprender cosas nuevas
 
 # Meta-Parámetros de Graduación
 SUCCESS_GOAL = 0.90
@@ -51,6 +55,43 @@ class Agent(nn.Module):
         self.critic_lstm = nn.LSTM(128, 128)
         self.critic_ln = nn.LayerNorm(128)
         self.critic_head = nn.Linear(128, 1)
+
+        # --- MEMORIA A LARGO PLAZO (TARGET CRITIC) ---
+        # Copia exacta del critic para estabilizar el aprendizaje (Consolidación)
+        self.target_critic_features = nn.Sequential(
+            nn.Linear(obs_dim, 256), nn.ReLU(),
+            nn.Linear(256, 128), nn.LayerNorm(128), nn.ReLU()
+        )
+        self.target_critic_lstm = nn.LSTM(128, 128)
+        self.target_critic_ln = nn.LayerNorm(128)
+        self.target_critic_head = nn.Linear(128, 1)
+        
+        # Inicializar Target con los mismos pesos
+        self.target_critic_features.load_state_dict(self.critic_features.state_dict())
+        self.target_critic_lstm.load_state_dict(self.critic_lstm.state_dict())
+        self.target_critic_ln.load_state_dict(self.critic_ln.state_dict())
+        self.target_critic_head.load_state_dict(self.critic_head.state_dict())
+        
+        # Congelar gradientes del Target (solo se actualiza vía soft-update)
+        for param in self.target_parameters():
+            param.requires_grad = False
+
+    def target_parameters(self):
+        return (list(self.target_critic_features.parameters()) + 
+                list(self.target_critic_lstm.parameters()) + 
+                list(self.target_critic_ln.parameters()) + 
+                list(self.target_critic_head.parameters()))
+
+    def update_target_network(self, tau):
+        # Soft Update: target = (1-tau)*target + tau*source
+        for target_param, param in zip(self.target_critic_features.parameters(), self.critic_features.parameters()):
+            target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
+        for target_param, param in zip(self.target_critic_lstm.parameters(), self.critic_lstm.parameters()):
+            target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
+        for target_param, param in zip(self.target_critic_ln.parameters(), self.critic_ln.parameters()):
+            target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
+        for target_param, param in zip(self.target_critic_head.parameters(), self.critic_head.parameters()):
+            target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
     def get_action_and_value(self, x, actor_state, critic_state, done, action=None):
         a_hidden = self.actor_features(x)
@@ -97,6 +138,21 @@ class Agent(nn.Module):
         new_c_hidden = self.critic_ln(new_c_hidden)
         return self.critic_head(new_c_hidden)
 
+    def get_target_value(self, x, target_state, done):
+        """Calcula el valor usando la Memoria a Largo Plazo (Target Network)"""
+        batch_size = target_state[0].shape[1]
+        c_hidden = self.target_critic_features(x).reshape((-1, batch_size, 128))
+        done_reshaped = done.reshape((-1, batch_size))
+        new_c_hidden = []
+        for h, d in zip(c_hidden, done_reshaped):
+            d_f = d.view(1, -1, 1).float()
+            target_state = ((1.0-d_f)*target_state[0], (1.0-d_f)*target_state[1])
+            h, target_state = self.target_critic_lstm(h.unsqueeze(0), target_state)
+            new_c_hidden += [h]
+        new_c_hidden = torch.flatten(torch.cat(new_c_hidden), 0, 1)
+        new_c_hidden = self.target_critic_ln(new_c_hidden)
+        return self.target_critic_head(new_c_hidden), target_state
+
 class EliteBuffer:
     def __init__(self, capacity=2000):
         self.buffer = []
@@ -140,6 +196,7 @@ if __name__ == "__main__":
     next_done = torch.zeros(NUM_ENVS).to(DEVICE)
     next_a_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
     next_c_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
+    next_target_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
     
     episode_steps = np.zeros(NUM_ENVS)
     bar_fmt = "{desc} [{bar}] {percentage:3.0f}% | {postfix} | RT:{elapsed}"
@@ -156,6 +213,7 @@ if __name__ == "__main__":
         
         init_a_state = (next_a_state[0].clone(), next_a_state[1].clone())
         init_c_state = (next_c_state[0].clone(), next_c_state[1].clone())
+        # No necesitamos clonar target_state para el rollout, solo para la inferencia de bootstrap
         
         for step in range(NUM_STEPS):
             obs_b[step], done_b[step] = next_obs, next_done
@@ -167,6 +225,15 @@ if __name__ == "__main__":
             next_obs_raw, reward, done, infos = envs.step(action.cpu().numpy())
             
             rew_b[step] = torch.tensor(reward).to(DEVICE)
+
+            # --- CURIOSIDAD INTRÍNSECA (Fase 4) ---
+            # Calcular Sorpresa: |Reward + Gamma * V_target(next) - V_online(curr)|
+            # Usamos V_online(curr) que ya tenemos en val_b[step]
+            # Estimamos V_target(next) rápidamente (sin actualizar estado LSTM target paso a paso por eficiencia, usamos snapshot)
+            # Nota: Para simplificar y no duplicar coste, usamos el error de predicción del Critic Online como proxy de sorpresa.
+            # Surprise ~= |TD-Error|
+            # surprise = torch.abs(rew_b[step] + 0.99 * val_b[step] - val_b[step]) # Simplificación
+            # Implementación real: Usar el reward intrínseco en el cálculo de GAE después.
             next_obs, next_done = torch.Tensor(next_obs_raw).to(DEVICE), torch.Tensor(done).to(DEVICE)
             episode_steps += 1
             
@@ -184,7 +251,9 @@ if __name__ == "__main__":
                              with torch.no_grad():
                                  d_a = (torch.zeros(1,1,128).to(DEVICE), torch.zeros(1,1,128).to(DEVICE))
                                  d_c = (torch.zeros(1,1,128).to(DEVICE), torch.zeros(1,1,128).to(DEVICE))
-                                 trunc_val_b[step, i] = agent.get_value(term_obs_t, d_a, d_c, torch.zeros(1,1).to(DEVICE)).item()
+                                 # Usar Target para bootstrap de truancation es más estable
+                                 term_val, _ = agent.get_target_value(term_obs_t, d_c, torch.zeros(1,1).to(DEVICE))
+                                 trunc_val_b[step, i] = term_val.item()
                     
                     if is_success:
                         traj_obs, traj_act, traj_rew = zip(*current_trajectories[i])
@@ -196,13 +265,32 @@ if __name__ == "__main__":
                     episode_steps[i] = 0; current_trajectories[i] = []
 
         with torch.no_grad():
-            next_value = agent.get_value(next_obs, next_a_state, next_c_state, next_done).reshape(1, -1)
+            # Bootstrap con Target Network (Estabilidad Cognitiva)
+            next_value, next_target_state = agent.get_target_value(next_obs, next_target_state, next_done)
+            next_value = next_value.reshape(1, -1)
+            
             adv_b = torch.zeros_like(rew_b).to(DEVICE); lastgaelam = 0
             for t in reversed(range(NUM_STEPS)):
                 nt = 1.0 - next_done if t == NUM_STEPS-1 else 1.0 - done_b[t+1]
+                # Si t+1 es terminal, next_val es next_value (calculado arriba). 
+                # Si no, deberíamos usar el target value almacenado... pero por eficiencia usamos val_b (online) 
+                # o idealmente recalculamos target values. Para Phase 4, usamos Online para GAE pero Target para Bootstrap final.
+                # MEJORA: Calcular Curiosidad aquí
+                
+                # TD-Error como Curiosidad: Surprise = |Delta|
+                # R_total = R_ext + w * |Delta_prev|
+                
                 nv = next_value if t == NUM_STEPS-1 else val_b[t+1]
                 delta = rew_b[t] + 0.99 * (nv * nt + trunc_val_b[t]) - val_b[t]
-                adv_b[t] = lastgaelam = delta + 0.99 * 0.95 * nt * lastgaelam
+                
+                # CURIOSITY BONUS
+                intrinsic_reward = CURIOSITY_WEIGHT * torch.abs(delta)
+                # Sumamos curiosidad al reward para el cálculo de ventaja (Motivation)
+                # delta_total = (rew_b[t] + intrinsic_reward) + ...
+                # Pero GAE estándar usa reward puro. Sumamos al delta.
+                delta_w_curiosity = delta + intrinsic_reward
+                
+                adv_b[t] = lastgaelam = delta_w_curiosity + 0.99 * 0.95 * nt * lastgaelam
             ret_b = adv_b + val_b
 
         env_indices = np.arange(NUM_ENVS)
@@ -232,6 +320,9 @@ if __name__ == "__main__":
                 
                 loss = pg_loss - ent_coef * entropy.mean() + v_loss * 0.5
                 optimizer.zero_grad(); loss.backward(); nn.utils.clip_grad_norm_(agent.parameters(), 0.5); optimizer.step()
+
+        # --- CONSOLIDACIÓN DE MEMORIA (Update Target) ---
+        agent.update_target_network(TARGET_TAU)
 
         avg_success = np.mean(success_buffer) if len(success_buffer) >= 20 else 0
         avg_steps = np.mean(step_buffer) if len(step_buffer) >= 20 else 50
@@ -272,6 +363,7 @@ if __name__ == "__main__":
             next_obs = torch.Tensor(envs.reset()).to(DEVICE); next_done = torch.zeros(NUM_ENVS).to(DEVICE)
             next_a_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
             next_c_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
+            next_target_state = (torch.zeros(1, NUM_ENVS, 128).to(DEVICE), torch.zeros(1, NUM_ENVS, 128).to(DEVICE))
             success_buffer.clear(); step_buffer.clear(); best_success_rate = 0.0; rollouts_since_improvement = 0
             pbar.desc = f"LVL {current_level}"; MAX_STEPS_ALLOWED = [15, 20, 25, 30][current_level]
 

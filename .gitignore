@@ -1,0 +1,43 @@
+# ========================
+# Python
+# ========================
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Runtime artifacts
+telemetry_history.json
+data/logs/
+
+# ========================
+# Unreal Engine 5
+# ========================
+unreal/Binaries/
+unreal/Intermediate/
+unreal/DerivedDataCache/
+unreal/Saved/
+unreal/.vs/
+unreal/*.sln
+unreal/.vsconfig
+unreal/Content/Collections/
+unreal/Content/Developers/
+unreal/Content/__ExternalActors__/
+unreal/Content/__ExternalObjects__/
+
+# ========================
+# IDE / System
+# ========================
+.agent/
+.vs/
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.VC.db
+.idea/
+*.swp
+Thumbs.db
+.DS_Store

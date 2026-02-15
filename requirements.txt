@@ -1,6 +1,7 @@
 # Core Deep Reinforcement Learning
 gymnasium>=0.29.0
 stable-baselines3>=2.2.0
+sb3-contrib>=2.2.0
 torch>=2.0.0
 
 # Visualization and Monitoring

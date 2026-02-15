@@ -1,30 +1,208 @@
 # AutoMind-Agent: Autonomous Navigation through Nested DRL
 
-## Hombros de Gigantes: Nuestra Filosofía de Investigación
+Un sistema de navegación autónoma desarrollado mediante **Deep Reinforcement Learning (Nested PPO-LSTM)** con arquitectura cognitiva avanzada.
 
-Este proyecto no es una isla de conocimiento; es una estructura erigida sobre los **hombros de gigantes**. En **AutoMind-Agent**, reconocemos que la innovación disruptiva nace de la síntesis de fronteras. Hemos utilizado **Google DeepMind** como nuestra brújula arquitectónica y **NotebookLM** como el catalizador crítico para orquestar y sintetizar flujos masivos de conocimiento científico en una solución tangible. No solo estamos programando un agente autonomo; estamos participando en una tradición de excelencia en investigación que busca democratizar el acceso a arquitecturas de memoria profunda complejas.
+> 🎥 **[Ver Demostración en YouTube](https://www.youtube.com/watch?v=y8B7s-VUskQ)**
 
-## Visión y Filosofía del Proyecto
+---
 
-Este desarrollo no nace en el vacío; se erige sobre la vanguardia de la investigación en Inteligencia Artificial Contemporánea. Inspirado por la trayectoria de **Google DeepMind** y potenciado por herramientas de síntesis de conocimiento de frontera como **NotebookLM**, este proyecto representa una convergencia deliberada entre la teoría académica y la ejecución empírica de alto rendimiento. Nuestra filosofía se basa en la premisa de que la innovación no es solo la aplicación de algoritmos existentes, sino la superación activa de sus limitaciones fundamentales.
+## 💡 Introducción
 
-### El Desafío del Conocimiento Persistente
-En el núcleo de este sistema late el abordaje del **Olvido Catastrófico** (*Catastrophic Forgetting*). Al implementar arquitecturas de **Nested Learning** mediante sistemas de **Slow-Fast Networks**, trascendemos el control reactivo convencional. La *Fast Network* se adapta dinámicamente a la exploración inmediata, mientras que la *Slow Network* destila y preserva un *Global Policy Buffer* de conocimiento robusto. No buscamos simplemente que un agente llegue a su destino, sino que desarrolle una competencia cognitiva que perdure a través de la experiencia.
+### La Problemática
+La problemática ha estado siempre presente en el campo de la Inteligencia Artificial: **la ineficiencia del aprendizaje**. Los agentes actuales aprenden lento, requieren recursos computacionales inmensos (clusters de GPUs) y sufren de amnesia digital (Olvido Catastrófico) al enfrentar nuevas tareas.
 
-### Ingeniería para la Convergencia: El Factor Hardware
-La elección del procesador **Intel i9-10900KF** no es una coincidencia accidental, sino una decisión arquitectónica estratégica. Históricamente, los modelos de memoria profunda y aprendizaje anidado han sido confinados al plano de lo teórico debido a su costo computacional. Al saturar 20 hilos de ejecución concurrentes —16 para exploración masiva en entornos paralelos y 4 dedicados a la destilación asíncrona de conocimiento— transformamos la teoría en una solución tangible. Estamos utilizando potencia de cálculo bruta para domesticar la complejidad de los gradientes de política profunda.
+### La Solución: Hombros de Gigantes
+Nuestra respuesta no es reinventar la rueda. **AutoMind-Agent** se apoya en la investigación de vanguardia de **Google DeepMind** (arquitecturas de memoria profunda) y la aplica con una capa de innovación diseñada para la accesibilidad.
+Hemos creado una solución que no solo replica, sino que **adapta** estos avances para funcionar eficientemente en hardware de consumo, ya sea utilizando **CPU, GPU o un enfoque híbrido**. No buscamos solo un agente que navegue; buscamos democratizar el acceso a arquitecturas cognitivas robustas.
 
-#### Especificaciones Técnicas y Throughput de Investigación
+---
 
-| Dimensión Técnica | Especificación de Hardware (i9-10900KF) | Complejidad del Modelo (Nested PPO-LSTM) | Impacto en la Investigación (Throughput) |
-| :--- | :--- | :--- | :--- |
-| **Paralelismo** | 10 Cores / 20 Hilos Lógicos | 16 Instancias Paralelas (`SubprocVecEnv`) | Recolección de experiencias optimizada a ~1.5M pasos/hora. |
-| **Ciclos de Reloj** | 3.70 GHz (Base) - 5.30 GHz (Boost) | Inferencia de Baja Latencia / Control Reactivo | Minimización de cuellos de botella en la *Fast Network* durante exploración. |
-| **Sincronía de Memoria** | Ancho de banda de memoria masivo | Estructura Dual (Fast-Slow Policy Buffer) | Destilación de conocimiento persistente sin interrupción del flujo principal. |
-| **Optimización Híbrida** | Multi-threaded Vectorization | Surprise-based Prioritization | Filtrado de experiencias críticas procesado en segundo plano (Background Threads). |
+## 📊 Resultados Empíricos (Entrenamiento Real)
 
-### Un Horizonte de Conquista
-Nuestra meta es inspirar a la comunidad de investigadores y compañeros a ver cada limitación técnica no como una barrera infranqueable, sino como el próximo horizonte a conquistar. Este proyecto es una declaración de intenciones: el olvido no es una característica intrínseca del aprendizaje automático, sino un problema de ingeniería esperando una solución elegante.
+Los siguientes datos fueron obtenidos en una ejecución real (Single-Run) utilizando un procesador **Intel i9-10900KF (CPU-Only)**, demostrando la eficiencia del código sin necesidad de aceleración por hardware dedicado.
 
-#### Un Llamado a la Acción
-A mis compañeros estudiantes y futuros ingenieros: el tiempo de ser meros consumidores o usuarios de herramientas de IA ha terminado. Los instamos a dar el salto cualitativo hacia la **arquitectura de sistemas inteligentes**. Dejemos de preguntar qué puede hacer la IA por nosotros y empecemos a diseñar las estructuras que definirán el comportamiento de las máquinas del mañana. Seamos los arquitectos, no solo los operadores.
+### Resumen de Convergencia
+El agente logró **maestría total (curriculum completo)** en **~31 minutos**, demostrando una curva de aprendizaje estable incluso ante aumentos drásticos de complejidad.
+
+| Nivel | Dificultad | Tasa de Éxito Final | Tiempo de Entrenamiento | Notas Cognitivas |
+|:---:|:---|:---:|:---:|:---|
+| **L0** | Infante (Sin obstáculos) | **100%** | 04:35 min | Aprendizaje lineal rápido. |
+| **L1** | Explorador (Spawn aleatorio) | **96%** | 04:51 min | Generalización espacial exitosa. |
+| **L2** | Aprendiz (Obstáculos bajos) | **90%** | 05:07 min | Adaptación a bloqueos simples. |
+| **L3** | Experto (Alta densidad) | **93%** | 16:40 min | **Deep Thinking:** Se observaron múltiples reducciones automáticas de LR (Plateaus) indicando ajuste fino de la política. |
+
+### Análisis de la Fase "Experto" (L3)
+La Fase 3 es crítica. Los logs muestran cómo el agente, al enfrentar alta densidad de obstáculos, activó su mecanismo de **Plateau LR Reduction** (reducción de tasa de aprendizaje) cuatro veces consecutivas (de `2.0e-04` a `8.2e-05`). Esto no es un fallo, sino un comportamiento emergente de "concentración", permitiéndole refinar su precisión para subir del **51%** al **93%** de éxito final.
+
+---
+
+## 🧠 Arquitectura del Agente
+
+### Slow-Fast Networks (Olvido Catastrófico)
+El sistema implementa redes duales para combatir el **Olvido Catastrófico** (*Catastrophic Forgetting*):
+- **Fast Network:** Se adapta dinámicamente a la exploración inmediata.
+- **Slow Network (Target):** Destila y consolida conocimiento global mediante **Polyak Updates** (`tau=0.01`).
+
+### Aprendizaje Curricular: Curriculum Gate
+El agente aprende de forma progresiva, atravesando "Gates" de dificultad:
+
+1.  **Nivel 0 (Infante):** Navegación básica.
+2.  **Nivel 1 (Explorador):** Generalización de spawns.
+3.  **Nivel 2 (Aprendiz):** Introducción de obstáculos.
+4.  **Nivel 3 (Experto):** Navegación compleja con alta densidad.
+
+### Motivación Intrínseca (Curiosidad)
+El agente utiliza **TD-Error Surprise** como señal de curiosidad intrínseca, priorizando situaciones novedosas para un aprendizaje significativamente más rápido.
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+AutoMind-Agent/
+├── scripts/                     # Código Python del agente
+│   ├── taxi_env.py              # 🎮 Entorno Gymnasium personalizado
+│   ├── train_gate.py            # 🧠 Script de entrenamiento (Curriculum Gate)
+│   ├── demo_agent.py            # 🚀 Demo + bridge WebSocket → Unreal Engine
+│   ├── manual_driver.py         # 🕹️ Control manual para testing
+│   └── test_3d_client.py        # 🔌 Cliente de prueba WebSocket
+│
+├── models/                      # Modelo entrenado
+│   └── automind_final.pth       # ✅ Checkpoint final (Nivel 3 completado)
+│
+├── visualizer/                  # Visualizador web ligero
+│   ├── visualizer.html          # 🌐 Visualización HTML/JS
+│   └── visualizer-html.png      # 📸 Screenshot del visualizador
+│
+├── unreal/                      # Proyecto Unreal Engine 5.6
+│   ├── TaxiAgentSim.uproject
+│   ├── Config/                  # Configuraciones del motor
+│   ├── Source/                  # Código C++ del plugin
+│   │   └── TaxiAgentSim/       # Actor, GameInstance, Types
+│   └── Content/                 # Mapas y Blueprints
+│
+├── requirements.txt             # Dependencias Python
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 🚀 Quick Start
+
+### Requisitos Previos
+- **Python 3.10+**
+- **Unreal Engine 5.6** (para la simulación 3D)
+- **Visual Studio 2022** con carga de trabajo "Desarrollo de juegos con C++"
+
+### 1. Configurar el Entorno Python
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/rafael1599/AutoMind-Agent.git
+cd AutoMind-Agent
+
+# Crear entorno virtual
+python -m venv .venv
+
+# Activar entorno (Windows)
+.venv\Scripts\activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+```
+
+### 2. Entrenar tu Propio Agente (Opcional)
+
+El modelo pre-entrenado (`models/automind_final.pth`) ya está incluido. Si deseas entrenar desde cero:
+
+```bash
+# Crear carpeta de modelos (si no existe)
+mkdir models
+
+# Iniciar entrenamiento con Curriculum Gate
+python scripts/train_gate.py
+```
+
+El entrenamiento progresará automáticamente por los 4 niveles. Puedes monitorear el progreso con TensorBoard:
+
+```bash
+tensorboard --logdir data/logs
+```
+
+> 💡 **Compatibilidad:** El entrenamiento funciona en **CPU** (Intel i9 recomendado), **GPU** (CUDA), o modo **híbrido**. El script detecta automáticamente la mejor opción disponible.
+
+### 3. Ejecutar la Demo con el Visualizador Web
+
+Para una prueba rápida sin necesidad de Unreal Engine:
+
+```bash
+python scripts/demo_agent.py
+```
+
+Luego abre `visualizer/visualizer.html` en tu navegador para ver al agente en acción.
+
+![Visualizador HTML](visualizer/visualizer-html.png)
+
+---
+
+## 🎮 Configurar la Simulación en Unreal Engine 5.6
+
+Sigue estos pasos para compilar y ejecutar la simulación 3D completa.
+
+### Paso 1: Preparar el proyecto
+
+> ⚠️ **Nota sobre los Assets:** Para mantener el repositorio ligero, se ha excluido la carpeta `CitySampleVehicles` (~7.5GB). Si deseas ver los modelos de autos en alta calidad, debes descargar el asset pack gratuito **City Sample Vehicles** en el Marketplace de Unreal Engine y colocarlo en `unreal/Content/CitySampleVehicles`. De lo contrario, el agente funcionará correctamente pero podría no mostrar el modelo 3D del vehículo.
+
+1. Navega a la carpeta `unreal/` dentro del repositorio clonado.
+2. **Clic derecho** sobre `TaxiAgentSim.uproject`.
+3. Selecciona **"Generate Visual Studio project files"** en el menú contextual.
+   - Esto creará el archivo `TaxiAgentSim.sln` y las carpetas `Intermediate/` necesarias.
+   - ⚠️ Si no ves esta opción, asegúrate de tener **Unreal Engine 5.6** instalado correctamente.
+
+### Paso 2: Compilar el proyecto
+
+4. Abre el archivo `TaxiAgentSim.sln` que se acaba de generar con **Visual Studio 2022**.
+5. En Visual Studio:
+   - Asegúrate de que la configuración sea **Development Editor** y la plataforma **Win64**.
+   - En el **Solution Explorer**, haz clic derecho sobre el proyecto `TaxiAgentSim` y selecciona **"Set as StartUp Project"**.
+   - Presiona **Ctrl+B** (o menú **Build → Build Solution**) para compilar.
+   - Espera a que la compilación termine exitosamente (puede tomar varios minutos la primera vez).
+
+### Paso 3: Ejecutar la simulación
+
+6. Presiona **F5** (o **Debug → Start Debugging**) para abrir el proyecto en el **Unreal Editor**.
+7. Dentro del Unreal Editor, presiona **Play** (▶) para iniciar la simulación.
+8. En una terminal separada, ejecuta el script de demostración para conectar el agente vía WebSocket:
+
+```bash
+python scripts/demo_agent.py
+```
+
+> El agente se conectará automáticamente al Unreal Engine y verás la navegación en tiempo real con efectos visuales de celebración al completar cada nivel.
+
+---
+
+## 🔬 Filosofía de Investigación
+
+Este proyecto se erige sobre los **hombros de gigantes**. Utilizamos **Google DeepMind** como brújula arquitectónica y **NotebookLM** como catalizador crítico para orquestar flujos de conocimiento científico. No solo programamos un agente autónomo; participamos en una tradición de excelencia que busca democratizar el acceso a arquitecturas de memoria profunda complejas.
+
+### Especificaciones Técnicas
+
+| Dimensión | Hardware (i9-10900KF) | Modelo (Nested PPO-LSTM) | Throughput |
+|:---|:---|:---|:---|
+| **Paralelismo** | 10C / 20T | 12 Instancias Paralelas | ~6,500 steps/seg |
+| **Ciclos de Reloj** | 3.70-5.30 GHz | Inferencia de Baja Latencia | Fast Network sin cuello de botella |
+| **Memoria** | Ancho de banda masivo | Estructura Dual (Fast-Slow) | Destilación persistente |
+| **Optimización** | Multi-threaded | Surprise-based Prioritization | Filtrado en segundo plano |
+
+### Un Llamado a la Acción
+A mis compañeros estudiantes y futuros ingenieros: el tiempo de ser meros consumidores de herramientas de IA ha terminado. Los instamos a dar el salto hacia la **arquitectura de sistemas inteligentes**. Seamos los arquitectos, no solo los operadores.
+
+---
+
+## 📄 Licencia
+
+Este proyecto fue desarrollado como trabajo académico. Consulta con el autor antes de uso comercial.
+
+**Autor:** [rafael1599](https://github.com/rafael1599)
