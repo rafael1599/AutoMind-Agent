@@ -96,9 +96,10 @@ AutoMind-Agent/
 - **Unreal Engine 5.6** (Para la simulación 3D opcional)
 - **Visual Studio 2022** con la carga de trabajo "Game development with C++"
 
-### 1. Configurar el Entorno Python (Entorno Vacío)
+### 1. Configurar el Entorno Python (Desde el Directorio Raíz)
 
-Si estás configurando el proyecto desde cero en una máquina nueva, sigue estos pasos:
+> [!IMPORTANT]
+> **Directorio de Trabajo:** Asegúrate de ejecutar todos los comandos desde la carpeta raíz del proyecto (`AutoMind-Agent/`).
 
 ```powershell
 # 1. Clonar el repositorio
@@ -111,12 +112,17 @@ python -m venv .venv
 # 3. Activar el entorno (Windows)
 .venv\Scripts\activate
 
-# 4. INSTALAR DEPENDENCIAS (El paso más importante)
+# 4. INSTALAR DEPENDENCIAS
+# Asegúrate de estar en la raíz donde se encuentra 'requirements.txt'
 pip install -r requirements.txt
 
 # 5. Ejecutar la demo o el entrenamiento
 python scripts/demo_agent.py
 ```
+
+> [!TIP]
+> **¿Error "No such file or directory: 'requirements.txt'"?**
+> Este error ocurre si intentas instalar los requerimientos desde dentro de la carpeta `scripts/`. Vuelve a la raíz del proyecto (`cd ..`) y repite el comando `pip install -r requirements.txt`.
 
 > [!CAUTION] 
 > **Gestión de Recursos (CPU):** 
