@@ -22,14 +22,14 @@ Hemos creado una solución que no solo replica, sino que **adapta** estos avance
 Los siguientes datos fueron obtenidos en una ejecución real (Single-Run) utilizando un procesador **Intel i9-10900KF (CPU-Only)**, demostrando la eficiencia del código sin necesidad de aceleración por hardware dedicado.
 
 ### Resumen de Convergencia
-El agente logró **maestría total (curriculum completo)** en **~31 minutos**, demostrando una curva de aprendizaje estable incluso ante aumentos drásticos de complejidad.
+El agente logró **maestría total (curriculum completo)** en tan solo **16 minutos y 40 segundos**, demostrando una eficiencia extrema incluso ante aumentos drásticos de complejidad en la fase final (Nivel 3).
 
-| Nivel | Dificultad | Tasa de Éxito Final | Tiempo de Entrenamiento | Notas Cognitivas |
+| Nivel | Dificultad | Tasa de Éxito Final | Tiempo (Tramo) | Tiempo Acumulado |
 |:---:|:---|:---:|:---:|:---|
-| **L0** | Infante (Sin obstáculos) | **100%** | 04:35 min | Aprendizaje lineal rápido. |
-| **L1** | Explorador (Spawn aleatorio) | **96%** | 04:51 min | Generalización espacial exitosa. |
-| **L2** | Aprendiz (Obstáculos bajos) | **90%** | 05:07 min | Adaptación a bloqueos simples. |
-| **L3** | Experto (Alta densidad) | **93%** | 16:40 min | **Deep Thinking:** Se observaron múltiples reducciones automáticas de LR (Plateaus) indicando ajuste fino de la política. |
+| **L0** | Infante (Sin obstáculos) | **100%** | 04:35 min | 04:35 min |
+| **L1** | Explorador (Spawn aleatorio) | **96%** | 00:16 min | 04:51 min |
+| **L2** | Aprendiz (Obstáculos bajos) | **90%** | 00:16 min | 05:07 min |
+| **L3** | Experto (Alta densidad) | **93%** | 11:33 min | 16:40 min |
 
 ### Análisis de la Fase "Experto" (L3)
 La Fase 3 es crítica. Los logs muestran cómo el agente, al enfrentar alta densidad de obstáculos, activó su mecanismo de **Plateau LR Reduction** (reducción de tasa de aprendizaje) cuatro veces consecutivas (de `2.0e-04` a `8.2e-05`). Esto no es un fallo, sino un comportamiento emergente de "concentración", permitiéndole refinar su precisión para subir del **51%** al **93%** de éxito final.
