@@ -14,6 +14,10 @@ from tqdm import tqdm
 from collections import deque
 import random
 
+# --- DIRECTORIOS ---
+os.makedirs("models", exist_ok=True)
+os.makedirs("data/logs", exist_ok=True)
+
 # --- CONFIGURACION ---
 SEED = 42
 NUM_ENVS = 12
