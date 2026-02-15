@@ -216,3 +216,18 @@ Este proyecto se erige sobre los **hombros de gigantes**. Utilizamos **Google De
 ### Un Llamado a la Acción
 A mis compañeros estudiantes y futuros ingenieros: el tiempo de ser meros consumidores de herramientas de IA ha terminado. Los instamos a dar el salto hacia la **arquitectura de sistemas inteligentes**. Seamos los arquitectos, no solo los operadores.
 
+
+Proyecto: AutoMind-Agent
+
+Curso: Introducción a la Inteligencia Artificial
+
+Equipo de trabajo	Especialidades
+
+Rafael Lopez Cordova	- Ingeniero de Sistemas
+
+Yoandra Gisela Alvarez Perez	- Ingeniería Industrial
+
+Iván Carlo Petrlik Azabache - 	Ingeniero de Computación y Sistemas
+
+Maria Teresita Maydana	- Abogada Universidad de Buenos Aires, Mg. Relaciones Internacionales, Esp. IA
+
