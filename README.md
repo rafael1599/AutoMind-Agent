@@ -118,10 +118,10 @@ pip install -r requirements.txt
 python scripts/demo_agent.py
 ```
 
-> 💡 **Nota sobre Hardware (GPU vs CPU):** El agente está diseñado para ser flexible. El código **detectará automáticamente** tu procesador y tarjeta gráfica:
-> - **CPU:** Optimizado para procesadores Intel i9 (funciona perfecto en cualquier CPU moderna).
-> - **GPU:** Si tienes una tarjeta NVIDIA con drivers **CUDA** instalados, el agente la aprovechará.
-> - **Failsafe:** Si no tienes GPU o CUDA, el programa simplemente usará la CPU **sin romperse**.
+> [!CAUTION] 
+> **Gestión de Recursos (CPU):** 
+> El entrenamiento es una tarea intensiva. Por defecto, el script usa **12 procesos paralelos** (`NUM_ENVS = 12`).
+> Si notas que tu PC se calienta excesivamente o se vuelve lenta, puedes editar `scripts/train_gate.py` y reducir `NUM_ENVS` a un número menor (ej. 2 o 4). El código funcionará en cualquier CPU, pero la velocidad de aprendizaje disminuirá.
 
 ### 2. Entrenar tu Propio Agente (Opcional)
 
