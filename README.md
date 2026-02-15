@@ -91,26 +91,37 @@ AutoMind-Agent/
 ## 🚀 Quick Start
 
 ### Requisitos Previos
-- **Python 3.10+**
-- **Unreal Engine 5.6** (para la simulación 3D)
-- **Visual Studio 2022** con carga de trabajo "Desarrollo de juegos con C++"
+- **Python 3.10.x - 3.13.x** (Confirmado funcionamiento en la versión 3.13.12)
+- **Git** (Para clonar el repositorio)
+- **Unreal Engine 5.6** (Para la simulación 3D opcional)
+- **Visual Studio 2022** con la carga de trabajo "Game development with C++"
 
-### 1. Configurar el Entorno Python
+### 1. Configurar el Entorno Python (Entorno Vacío)
 
-```bash
-# Clonar el repositorio
+Si estás configurando el proyecto desde cero en una máquina nueva, sigue estos pasos:
+
+```powershell
+# 1. Clonar el repositorio
 git clone https://github.com/rafael1599/AutoMind-Agent.git
 cd AutoMind-Agent
 
-# Crear entorno virtual
+# 2. Crear el entorno virtual
 python -m venv .venv
 
-# Activar entorno (Windows)
+# 3. Activar el entorno (Windows)
 .venv\Scripts\activate
 
-# Instalar dependencias
+# 4. INSTALAR DEPENDENCIAS (El paso más importante)
 pip install -r requirements.txt
+
+# 5. Ejecutar la demo o el entrenamiento
+python scripts/demo_agent.py
 ```
+
+> 💡 **Nota sobre Hardware (GPU vs CPU):** El agente está diseñado para ser flexible. El código **detectará automáticamente** tu procesador y tarjeta gráfica:
+> - **CPU:** Optimizado para procesadores Intel i9 (funciona perfecto en cualquier CPU moderna).
+> - **GPU:** Si tienes una tarjeta NVIDIA con drivers **CUDA** instalados, el agente la aprovechará.
+> - **Failsafe:** Si no tienes GPU o CUDA, el programa simplemente usará la CPU **sin romperse**.
 
 ### 2. Entrenar tu Propio Agente (Opcional)
 
