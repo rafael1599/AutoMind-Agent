@@ -216,10 +216,3 @@ Este proyecto se erige sobre los **hombros de gigantes**. Utilizamos **Google De
 ### Un Llamado a la Acción
 A mis compañeros estudiantes y futuros ingenieros: el tiempo de ser meros consumidores de herramientas de IA ha terminado. Los instamos a dar el salto hacia la **arquitectura de sistemas inteligentes**. Seamos los arquitectos, no solo los operadores.
 
----
-
-## 📄 Licencia
-
-Este proyecto fue desarrollado como trabajo académico. Consulta con el autor antes de uso comercial.
-
-**Autor:** [rafael1599](https://github.com/rafael1599)
