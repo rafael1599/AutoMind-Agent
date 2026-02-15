@@ -24,12 +24,12 @@ Los siguientes datos fueron obtenidos en una ejecución real (Single-Run) utiliz
 ### Resumen de Convergencia
 El agente logró **maestría total (curriculum completo)** en tan solo **16 minutos y 40 segundos**, demostrando una eficiencia extrema incluso ante aumentos drásticos de complejidad en la fase final (Nivel 3).
 
-| Nivel | Dificultad | Tasa de Éxito Final | Tiempo (Tramo) | Tiempo Acumulado |
-|:---:|:---|:---:|:---:|:---|
-| **L0** | Infante (Sin obstáculos) | **100%** | 04:35 min | 04:35 min |
-| **L1** | Explorador (Spawn aleatorio) | **96%** | 00:16 min | 04:51 min |
-| **L2** | Aprendiz (Obstáculos bajos) | **90%** | 00:16 min | 05:07 min |
-| **L3** | Experto (Alta densidad) | **93%** | 11:33 min | 16:40 min |
+| Nivel | Dificultad | Tasa de Éxito Final | Tiempo de Ejecución |
+|:---:|:---|:---:|:---|
+| **L0** | Infante (Sin obstáculos) | **100%** | 04:35 min |
+| **L1** | Explorador (Spawn aleatorio) | **96%** | 00:16 min |
+| **L2** | Aprendiz (Obstáculos bajos) | **90%** | 00:16 min |
+| **L3** | Experto (Alta densidad) | **93%** | 11:33 min |
 
 ### Análisis de la Fase "Experto" (L3)
 La Fase 3 es crítica. Los logs muestran cómo el agente, al enfrentar alta densidad de obstáculos, activó su mecanismo de **Plateau LR Reduction** (reducción de tasa de aprendizaje) cuatro veces consecutivas (de `2.0e-04` a `8.2e-05`). Esto no es un fallo, sino un comportamiento emergente de "concentración", permitiéndole refinar su precisión para subir del **51%** al **93%** de éxito final.
